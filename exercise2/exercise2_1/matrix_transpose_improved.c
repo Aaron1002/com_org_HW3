@@ -1,11 +1,12 @@
 void matrix_transpose(int n, int *dst, int *src) {
-    for (int v = 0; v < n/8; v++) {
-        for (int u = 0; u < n/8; u++) {
-            for (int i = 0; i < 8; i++) {
-                for (int j = 0; j < 8; j++) {
-                    dst[v*8 + u*8*n + i*n + j] = src[8*n*v + 8*u + n*j + i];
-                }
-            }
-        }
-    }
+    for (int v = 0; v < n; v += 8) 
+        for (int u = 0; u < n; u += 8) 
+        
+            for (int i = v; i < ((v + 8 < n) ? (v + 8) : n); i++)
+                for (int j = u; j < ((u + 8 < n) ? (u + 8) : n); j++)
+                    dst[i*n + j] = src[i + n*j];
 }
+
+// dst: row-major
+// scr: column-major
+// order remain, but with 8x8 block size
