@@ -61,7 +61,7 @@ void cache_sim_t::init()
 
   // *** ADD: initialize FIFO queues for each set ***
   fifo_queues.clear();
-  fifo_queues.resize(sets);
+  fifo_queues.resize(sets); // initial fifo_queues, size is the number of sets
   for (size_t i = 0; i < sets; i++) {
     for (size_t w = 0; w < ways; w++) {
       fifo_queues[i].push(w);
@@ -120,15 +120,15 @@ uint64_t* cache_sim_t::check_tag(uint64_t addr)
 
 uint64_t cache_sim_t::victimize(uint64_t addr)
 {
-  size_t idx = (addr >> idx_shift) & (sets-1);
+  size_t idx = (addr >> idx_shift) & (sets-1); // 篩選出 index bits(only)
   //size_t way = lfsr.next() % ways;
   // *** ADD: FIFO replacement: select oldest way in queue ***
-  size_t way = fifo_queues[idx].front();
-  fifo_queues[idx].pop();
-  fifo_queues[idx].push(way);
+  size_t way = fifo_queues[idx].front();  // 找編號為 idx 的 set，抓出最前面的 block
+  fifo_queues[idx].pop(); // pop the oldest block from the queue
+  fifo_queues[idx].push(way); // push the block back to the end of the queue
   
-  uint64_t victim = tags[idx*ways + way]; // find the needed block in memory
-  tags[idx*ways + way] = (addr >> idx_shift) | VALID;
+  uint64_t victim = tags[idx*ways + way]; // find the victim block (第 idx 個 set 的第 way 個 block)
+  tags[idx*ways + way] = (addr >> idx_shift) | VALID; // 篩選出 tag 並標上 VALID bit, update to the target block
   return victim;
 }
 
@@ -209,7 +209,7 @@ uint64_t* fa_cache_sim_t::check_tag(uint64_t addr)
 uint64_t fa_cache_sim_t::victimize(uint64_t addr)
 {
   uint64_t old_tag = 0;
-  if (tags.size() == ways)
+  if (tags.size() == ways)  // cache is full
   {
     /*
     auto it = tags.begin();
@@ -222,12 +222,12 @@ uint64_t fa_cache_sim_t::victimize(uint64_t addr)
     uint64_t victim_key = fa_fifo.front();
     fa_fifo.pop();
     old_tag = tags[victim_key];
-    tags.erase(victim_key);
+    tags.erase(victim_key); 
   }
-  //tags[addr >> idx_shift] = (addr >> idx_shift) | VALID;
+  //tags[addr >> idx_shift] = (addr >> idx_shift) | VALID;  // dynamic allocation
   
   // insert new tag
-  tags[key] = key | VALID;
+  tags[key] = key | VALID;  // set the tag with VALID bit
   fa_fifo.push(key);  // *** ADD: record insertion order ***
   return old_tag;
 }

@@ -54,6 +54,7 @@ class cache_sim_t
   size_t idx_shift;
 
   uint64_t* tags;
+  // sets in fifo_queues, each set has blocks(ways)
   std::vector<std::queue<size_t>> fifo_queues;  // *** ADD: per-set FIFO queue of ways ***
   
   uint64_t read_accesses;
@@ -79,7 +80,8 @@ class fa_cache_sim_t : public cache_sim_t
  private:
   static bool cmp(uint64_t a, uint64_t b);
   std::map<uint64_t, uint64_t> tags;
-  std::queue<uint64_t> fa_fifo;    // *** ADD: FIFO queue of tags ***
+  // blocks in fa_fifo (for fully associative cache)
+  std::queue<uint64_t> fa_fifo;    // *** ADD: FIFO queue of tags *** (uint64_t is used as tag)
 };
 
 class cache_memtracer_t : public memtracer_t
